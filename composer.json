@@ -1,0 +1,16 @@
+{
+    "name": "kirytos/itrvb",
+    "autoload": {
+        "psr-4": {
+            "Kirytos\\Itrvb\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "kirytos"
+        }
+    ],
+    "require": {
+        "fakerphp/faker": "^1.23"
+    }
+}
