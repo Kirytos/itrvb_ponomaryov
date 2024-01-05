@@ -33,10 +33,10 @@ class ArticlesRepositoryImpl implements ArticlesRepository
             ]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$result) {
-                throw new ArticleNotFoundException("Комментарий с UUID $uuid не найден");
+                throw new ArticleNotFoundException("Article with UUID: $uuid not found!");
             }
         } catch (PDOException $e) {
-            throw new IllegalArgumentException("Ошибка при получении комментария: " . $e->getMessage());
+            throw new IllegalArgumentException("Error with getting article: " . $e->getMessage());
         }
 
         return $this->getArticle($result);

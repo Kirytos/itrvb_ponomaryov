@@ -80,7 +80,7 @@ class CommentRepositoryTest extends TestCase
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws IllegalArgumentException
      */
-    public function testItThrowsAnExceptionWhenUserNotFound(): void
+    public function testItThrowsAnExceptionWhenCommentNotFound(): void
     {
         $connectionStub = $this->createStub(PDO::class);
         $statementStub = $this->createStub(PDOStatement::class);
@@ -93,7 +93,7 @@ class CommentRepositoryTest extends TestCase
         $assumedUuid = 1;
 
         $this->expectException(CommentNotFoundException::class);
-        $this->expectExceptionMessage("Комментарий с UUID $assumedUuid не найден");
+        $this->expectExceptionMessage("Comment with UUID $assumedUuid not found!");
 
         $repository->get($assumedUuid);
     }

@@ -68,10 +68,10 @@ class CommentRepositoryImpl implements CommentRepository
             ]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$result) {
-                throw new CommentNotFoundException("Комментарий с UUID $uuid не найден");
+                throw new CommentNotFoundException("Comment with UUID $uuid not found!");
             }
         } catch (PDOException $e) {
-            throw new IllegalArgumentException("Ошибка при получении комментария: " . $e->getMessage());
+            throw new IllegalArgumentException("Error with getting comment: " . $e->getMessage());
         }
 
         return $this->getComment($result);
