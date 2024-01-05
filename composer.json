@@ -10,6 +10,10 @@
             "name": "kirytos"
         }
     ],
+    "scripts": {
+        "test": "phpunit tests --testdox --colors",
+        "test:coverage": "php -dxdebug.mode=coverage vendor/bin/phpunit tests --coverage-html coverage_report --coverage-filter src"
+    },
     "require": {
         "fakerphp/faker": "^1.23"
     },

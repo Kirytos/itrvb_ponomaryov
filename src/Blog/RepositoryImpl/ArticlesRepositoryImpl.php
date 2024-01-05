@@ -4,13 +4,12 @@ namespace Blog\RepositoryImpl;
 
 require_once 'src/Autoloader.php';
 
-use Blog\Article;
 use Blog\Exception\ArticleNotFoundException;
 use Blog\Exception\IllegalArgumentException;
+use Blog\Models\Article;
 use Blog\Repository\ArticlesRepository;
 use PDO;
 use PDOException;
-use PDOStatement;
 
 class ArticlesRepositoryImpl implements ArticlesRepository
 {
@@ -83,10 +82,10 @@ class ArticlesRepositoryImpl implements ArticlesRepository
     private function getArticle($result): Article
     {
         return new Article(
-            $result['uuid'],
             $result['author_uuid'],
             $result['title'],
-            $result['text']
+            $result['text'],
+            $result['uuid']
         );
     }
 }

@@ -3,7 +3,7 @@
 require_once 'src/Autoloader.php';
 require 'vendor/autoload.php';
 
-use Blog\Article;
+use Blog\Models\Article;
 use Faker\Factory;
 
 $fakerFactory = Factory::create();

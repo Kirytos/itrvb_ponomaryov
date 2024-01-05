@@ -1,10 +1,9 @@
 <?php
 
-use Blog\Article;
-use Blog\Comment;
 use Blog\RepositoryImpl\ArticlesRepositoryImpl;
 use Blog\RepositoryImpl\CommentRepositoryImpl;
 
+require 'vendor/autoload.php';
 require_once 'src/Autoloader.php';
 
 $connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
@@ -18,5 +17,10 @@ $articleRepository = new ArticlesRepositoryImpl($connection);
 //$comment1 = new Article(2,2, 4, 111);
 //$articleRepository->save($comment1);
 
-echo $commentRepository->get(1)->getText();
-echo $articleRepository->get(2)->getUuid();
+//echo $commentRepository->get(1)->getText();
+//echo $articleRepository->get(1)->getAuthorUuid();
+
+$faker = Faker\Factory::create();
+
+$fakeUuid = $faker->unique()->uuid;
+echo $fakeUuid;

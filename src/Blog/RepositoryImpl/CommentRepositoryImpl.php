@@ -5,14 +5,12 @@ namespace Blog\RepositoryImpl;
 require_once 'src/Autoloader.php';
 
 
-use Blog\Article;
-use Blog\Comment;
 use Blog\Exception\CommentNotFoundException;
 use Blog\Exception\IllegalArgumentException;
+use Blog\Models\Comment;
 use Blog\Repository\CommentRepository;
 use PDO;
 use PDOException;
-use PDOStatement;
 
 class CommentRepositoryImpl implements CommentRepository
 {
@@ -82,9 +80,9 @@ class CommentRepositoryImpl implements CommentRepository
     private function getComment($result): Comment
     {
         return new Comment(
-            $result['uuid'],
             $result['author_uuid'],
             $result['article_uuid'],
-            $result['text']);
+            $result['text'],
+            $result['uuid']);
     }
 }
