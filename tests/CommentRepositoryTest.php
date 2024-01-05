@@ -80,7 +80,7 @@ class CommentRepositoryTest extends TestCase
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws IllegalArgumentException
      */
-    public function testItThrowsAnExceptionWhenCommentNotFound(): void
+    public function testShouldThrowsAnExceptionWhenCommentNotFound(): void
     {
         $connectionStub = $this->createStub(PDO::class);
         $statementStub = $this->createStub(PDOStatement::class);

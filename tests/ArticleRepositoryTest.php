@@ -80,7 +80,7 @@ class ArticleRepositoryTest extends TestCase
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws IllegalArgumentException
      */
-    public function testItThrowsAnExceptionWhenArticleNotFound(): void
+    public function testShouldThrowsAnExceptionWhenArticleNotFound(): void
     {
         $connectionStub = $this->createStub(PDO::class);
         $statementStub = $this->createStub(PDOStatement::class);
