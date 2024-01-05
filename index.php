@@ -1,7 +1,7 @@
 <?php
 
 require_once 'src/Autoloader.php';
-require_once 'vendor/autoload.php';
+require 'vendor/autoload.php';
 
 use Blog\Article;
 use Faker\Factory;
@@ -17,7 +17,13 @@ $fakerFactory = Factory::create();
     echo "Random address".PHP_EOL;
     echo $fakerFactory->address;
 
-    $test = new Article(10000,2,3,"TESTTEST");
+    $test = new Article(10001,2,3,"TESTTEST");
     echo PHP_EOL;
-    echo $test->UUID;
+    echo $test->getUuid();
+    echo PHP_EOL;
+
+
+//    $rep = new RepositoryImpl\ArticlesRepositoryImpl();
+//
+//    echo $rep->get(1)->text;
 ?>

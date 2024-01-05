@@ -4,8 +4,6 @@
 
     interface ArticlesRepository
     {
-        public function save($article);
+        public function save($article) : void;
         public function get($uuid);
     }
-
-?>

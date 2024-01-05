@@ -1,6 +1,8 @@
 CREATE TABLE users
 (
-    uuid       UUID PRIMARY KEY,
+    uuid       TEXT DEFAULT lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' ||
+                            substr(lower(hex(randomblob(2))), 2) || '-a' || substr(lower(hex(randomblob(2))), 2) ||
+                            '-6' || substr(lower(hex(randomblob(2))), 2) || lower(hex(randomblob(6))) PRIMARY KEY,
     username   TEXT NOT NULL,
     first_name TEXT NOT NULL,
     last_name  TEXT NOT NULL
@@ -8,7 +10,9 @@ CREATE TABLE users
 
 CREATE TABLE articles
 (
-    uuid        UUID PRIMARY KEY,
+    uuid        TEXT DEFAULT lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' ||
+                             substr(lower(hex(randomblob(2))), 2) || '-a' || substr(lower(hex(randomblob(2))), 2) ||
+                             '-6' || substr(lower(hex(randomblob(2))), 2) || lower(hex(randomblob(6))) PRIMARY KEY,
     author_uuid UUID,
     title       TEXT NOT NULL,
     text        TEXT NOT NULL,
@@ -18,7 +22,9 @@ CREATE TABLE articles
 
 CREATE TABLE comments
 (
-    uuid         UUID PRIMARY KEY,
+    uuid         TEXT DEFAULT lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' ||
+                              substr(lower(hex(randomblob(2))), 2) || '-a' || substr(lower(hex(randomblob(2))), 2) ||
+                              '-6' || substr(lower(hex(randomblob(2))), 2) || lower(hex(randomblob(6))) PRIMARY KEY,
     article_uuid UUID,
     author_uuid  UUID,
     text         TEXT NOT NULL,
