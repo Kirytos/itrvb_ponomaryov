@@ -97,4 +97,28 @@ class ArticleRepositoryTest extends TestCase
 
         $repository->get($assumedUuid);
     }
+
+    /**
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws IllegalArgumentException
+     */
+    public function testShouldDeleteArticleFromDatabase(): void
+    {
+        $uuid = 'testUuid';
+
+        $statementMock = $this->createMock(PDOStatement::class);
+        $statementMock->expects($this->once())->method('execute')->with([':uuid' => $uuid]);
+
+        $connectionStub = $this->createStub(PDO::class);
+        $connectionStub->method('prepare')->willReturn($statementMock);
+
+        $repository = new ArticlesRepositoryImpl($connectionStub);
+
+        $this->expectException(ArticleNotFoundException::class);
+        $this->expectExceptionMessage("Article with UUID {$uuid} not found.");
+
+        $repository->delete($uuid);
+    }
+
+
 }

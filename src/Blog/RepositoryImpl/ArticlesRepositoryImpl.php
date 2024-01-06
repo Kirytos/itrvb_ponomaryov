@@ -19,7 +19,7 @@ class ArticlesRepositoryImpl implements ArticlesRepository
 
     private Generator $faker;
 
-    public function __construct(private PDO $pdo)
+    public function __construct(private readonly PDO $pdo)
     {
         $this->faker = Factory::create();
     }
@@ -30,15 +30,15 @@ class ArticlesRepositoryImpl implements ArticlesRepository
      */
     public function get($uuid): Article
     {
-        $stmt = $this->pdo->prepare(
+        $statement = $this->pdo->prepare(
             "SELECT * FROM articles WHERE uuid = :uuid"
         );
 
         try {
-            $stmt->execute([
+            $statement->execute([
                 ":uuid" => $uuid
             ]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
             if (!$result) {
                 throw new ArticleNotFoundException("Article with UUID: $uuid not found!");
             }
@@ -75,6 +75,26 @@ class ArticlesRepositoryImpl implements ArticlesRepository
         } catch (PDOException $exception) {
             throw new IllegalArgumentException("Save articles error with message: " . $exception->getMessage());
         }
+    }
+
+    /**
+     * @throws ArticleNotFoundException
+     * @throws IllegalArgumentException
+     */
+    public function delete($uuid): string
+    {
+        $statement = $this->pdo->prepare('DELETE FROM articles WHERE uuid = :uuid');
+
+        try {
+            $statement->execute([':uuid' => $uuid]);
+            if ($statement->rowCount() === 0) {
+                throw new ArticleNotFoundException("Article with UUID {$uuid} not found.");
+            }
+        } catch (PDOException $exception) {
+            throw new IllegalArgumentException("Delete article error with message: " . $exception->getMessage());
+        }
+
+        return $uuid;
     }
 
     private function getArticle($result): Article

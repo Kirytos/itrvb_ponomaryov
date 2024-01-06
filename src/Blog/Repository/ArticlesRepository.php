@@ -8,4 +8,5 @@
     {
         public function save($article) : void;
         public function get($uuid) : Article;
+        public function delete($uuid) : string;
     }

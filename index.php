@@ -5,8 +5,10 @@ require 'vendor/autoload.php';
 
 use Blog\Models\Article;
 use Faker\Factory;
+use Http\Request;
 
 $fakerFactory = Factory::create();
+$a = new Request(1,2,3);
 
     echo "Random text".PHP_EOL;
     echo $fakerFactory->text.PHP_EOL;
