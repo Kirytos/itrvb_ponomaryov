@@ -6,7 +6,7 @@
 
     interface ArticlesRepository
     {
-        public function save($article) : void;
+        public function save($article) : string;
         public function get($uuid) : Article;
         public function delete($uuid) : string;
     }

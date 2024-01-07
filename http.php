@@ -6,6 +6,7 @@ require_once 'src/Autoloader.php';
 use Http\Actions\Articles\CreateArticle;
 use Http\Actions\Articles\DeleteArticle;
 use Http\Actions\Comments\CreateComment;
+use Http\Actions\Likes\CreateLike;
 use Http\ErrorResponse;
 use Http\Request;
 use Blog\Exception\HttpException;
@@ -28,13 +29,14 @@ try {
 }
 
 $routes = [
-    'POST' => [
-        '/posts/comment' => CreateComment::class,
-        '/posts' => CreateArticle::class
-    ],
     'DELETE' => [
         '/posts' => DeleteArticle::class
     ],
+    'POST' => [
+        '/posts' => CreateArticle::class,
+        '/posts/comment' => CreateComment::class,
+        '/posts/likes' => CreateLike::class
+    ]
 ];
 
 if (!array_key_exists($method, $routes)) {

@@ -52,7 +52,7 @@ class ArticlesRepositoryImpl implements ArticlesRepository
     /**
      * @throws IllegalArgumentException
      */
-    public function save($article): void
+    public function save($article): string
     {
         $statement = $this->pdo->prepare(
             'INSERT INTO articles (uuid, author_uuid, title, text) VALUES (:uuid, :author_uuid, :title, :text)'
@@ -75,6 +75,8 @@ class ArticlesRepositoryImpl implements ArticlesRepository
         } catch (PDOException $exception) {
             throw new IllegalArgumentException("Save articles error with message: " . $exception->getMessage());
         }
+
+        return $article->getUuid();
     }
 
     /**

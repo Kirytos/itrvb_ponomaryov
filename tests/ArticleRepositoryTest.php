@@ -12,32 +12,29 @@ require_once 'src/Autoloader.php';
 class ArticleRepositoryTest extends TestCase
 {
 
+    private string $authorId = "1";
+    private string $title = "testTitle";
+    private string $text = "testText";
+    private string $id = "10";
+
     /**
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws IllegalArgumentException
      */
-    public function testShouldSaveArticleToDatabase(): void
+    public function testShouldDeleteArticleFromDatabase(): void
     {
         $statementMock = $this->createMock(PDOStatement::class);
+        $statementMock->expects($this->once())->method('execute')->with([':uuid' => $this->id]);
+
         $connectionStub = $this->createStub(PDO::class);
-        $waitingArticle = new Article(
-            authorId: 10,
-            title: "testTitle",
-            text: "testText",
-            id: 1
-        );
-
-        $statementMock->expects($this->once())->method('execute')->with([
-            ':uuid' => $waitingArticle->getUuid(),
-            ':author_uuid' => $waitingArticle->getAuthorUuid(),
-            ':title' => $waitingArticle->getTitle(),
-            ':text' => $waitingArticle->getText(),
-        ]);
-
         $connectionStub->method('prepare')->willReturn($statementMock);
 
         $repository = new ArticlesRepositoryImpl($connectionStub);
-        $repository->save($waitingArticle);
+
+        $this->expectException(ArticleNotFoundException::class);
+        $this->expectExceptionMessage("Article with UUID $this->id not found.");
+
+        $repository->delete($this->id);
     }
 
     /**
@@ -50,10 +47,10 @@ class ArticleRepositoryTest extends TestCase
         $connectionStub = $this->createStub(PDO::class);
         $statementMock = $this->createMock(PDOStatement::class);
         $waitingArticle = new Article(
-            authorId: 10,
-            title: "testTitle",
-            text: "testText",
-            id: 1
+            authorId: $this->authorId,
+            title: $this->title,
+            text: $this->text,
+            id: $this->id
         );
 
         $statementMock->method('fetch')->willReturn([
@@ -90,34 +87,38 @@ class ArticleRepositoryTest extends TestCase
 
         $repository = new ArticlesRepositoryImpl($connectionStub);
 
-        $assumedUuid = 1;
-
         $this->expectException(ArticleNotFoundException::class);
-        $this->expectExceptionMessage("Article with UUID: $assumedUuid not found!");
+        $this->expectExceptionMessage("Article with UUID: $this->id not found!");
 
-        $repository->get($assumedUuid);
+        $repository->get($this->id);
     }
 
     /**
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws IllegalArgumentException
      */
-    public function testShouldDeleteArticleFromDatabase(): void
+    public function testShouldSaveArticleToDatabase(): void
     {
-        $uuid = 'testUuid';
-
         $statementMock = $this->createMock(PDOStatement::class);
-        $statementMock->expects($this->once())->method('execute')->with([':uuid' => $uuid]);
-
         $connectionStub = $this->createStub(PDO::class);
+        $waitingArticle = new Article(
+            authorId: $this->authorId,
+            title: $this->title,
+            text: $this->text,
+            id: $this->id
+        );
+
+        $statementMock->expects($this->once())->method('execute')->with([
+            ':uuid' => $waitingArticle->getUuid(),
+            ':author_uuid' => $waitingArticle->getAuthorUuid(),
+            ':title' => $waitingArticle->getTitle(),
+            ':text' => $waitingArticle->getText(),
+        ]);
+
         $connectionStub->method('prepare')->willReturn($statementMock);
 
         $repository = new ArticlesRepositoryImpl($connectionStub);
-
-        $this->expectException(ArticleNotFoundException::class);
-        $this->expectExceptionMessage("Article with UUID {$uuid} not found.");
-
-        $repository->delete($uuid);
+        $repository->save($waitingArticle);
     }
 
 

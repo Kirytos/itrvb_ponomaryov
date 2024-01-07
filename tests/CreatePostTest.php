@@ -70,7 +70,7 @@ class CreatePostTest extends TestCase
             ) {
             }
 
-            public function save($article): void
+            public function save($article): string
             {
                 $flag = false;
 
@@ -86,6 +86,8 @@ class CreatePostTest extends TestCase
                 }
 
                 $this->articles[] = $article;
+
+                return "";
             }
 
             public function delete($uuid): string
@@ -139,7 +141,7 @@ class CreatePostTest extends TestCase
      * @preserveGlobalState disable
      * @throws JsonException
      */
-    public function testGetErrorResponseWithoutUserUuid(): void
+    public function testThrowErrorResponseWithoutUserUuid(): void
     {
         $data = [
             "author_uuid" => $this->correctUuid,

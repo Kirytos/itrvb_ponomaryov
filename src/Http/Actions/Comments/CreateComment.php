@@ -22,20 +22,17 @@ class CreateComment implements ActionInterface
      */
     public function handle($request): Response
     {
-        $uuid = Factory::create()->uuid();
-
         try {
             $newComment = new Comment(
-                $request->jsonBodyField('article_uuid'),
-                $request->jsonBodyField('author_uuid'),
-                $request->jsonBodyField('text'),
-                $uuid,
+                authorId: $request->jsonBodyField('author_uuid'),
+                articleId: $request->jsonBodyField('article_uuid'),
+                text: $request->jsonBodyField('text')
             );
         } catch (HttpException $e) {
             return new ErrorResponse($e->getMessage());
         }
 
-        $this->rep->save($newComment);
+        $uuid = $this->rep->save($newComment);
 
         return new SuccessfulResponse([
             'uuid' => $uuid,

@@ -1,9 +1,12 @@
 <?php
 
+use Blog\Models\Comment;
+use Blog\Models\Like;
 use Blog\Repository\ArticlesRepository;
 use Blog\Repository\CommentRepository;
 use Blog\RepositoryImpl\ArticlesRepositoryImpl;
 use Blog\RepositoryImpl\CommentRepositoryImpl;
+use Blog\RepositoryImpl\LikesRepositoryImpl;
 use Container\DIContainer;
 
 require 'vendor/autoload.php';
@@ -26,11 +29,17 @@ $connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 
 $commentRepository = new CommentRepositoryImpl($connection);
 $articleRepository = new ArticlesRepositoryImpl($connection);
+$likeRepository = new LikesRepositoryImpl($connection);
 
+$like = new Like("135", "135");
 
-echo $articleRepository->delete(111);
+$likeRepository->save($like);
 
-//$comment = new Comment(authorId: 2, articleId: 2, text: 1, id: 1238);
+//$likeRepository->getByPostUuid("1214");
+//
+//echo $articleRepository->delete(111);
+
+//$comment = new Comment(authorId: 2, articleId: 2, text: 1);
 //$commentRepository->save($comment);
 
 //$comment1 = new Article(2,2, 4, 1202);

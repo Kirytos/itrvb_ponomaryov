@@ -2,13 +2,15 @@
 
 namespace Blog\Models;
 
-class User {
+class User
+{
 
     private string $UUID;
     private string $firstName;
     private string $lastName;
 
-    public function __construct($id, $firstName, $lastName) {
+    public function __construct($id, $firstName, $lastName)
+    {
         $this->UUID = $id;
         $this->firstName = $firstName;
         $this->lastName = $lastName;

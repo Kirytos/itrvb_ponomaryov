@@ -21,14 +21,11 @@ class CreateArticle implements ActionInterface
 
     public function handle($request): Response
     {
-        $uuid = Factory::create()->uuid();
-
         try {
             $newArticle = new Article(
                 $request->jsonBodyField('author_uuid'),
                 $request->jsonBodyField('title'),
-                $request->jsonBodyField('text'),
-                $uuid,
+                $request->jsonBodyField('text')
             );
         } catch (HttpException) {
             return new ErrorResponse('error with getting JSON');
@@ -39,7 +36,7 @@ class CreateArticle implements ActionInterface
                 return new ErrorResponse('author uuid incorrect');
             }
 
-            $this->rep->save($newArticle);
+            $uuid = $this->rep->save($newArticle);
         } catch (Exception){
             return new ErrorResponse('error with save');
         }

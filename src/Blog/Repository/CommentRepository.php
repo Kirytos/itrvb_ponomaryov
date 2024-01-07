@@ -6,6 +6,6 @@
 
     interface CommentRepository
     {
-        public function save($article) : void;
+        public function save($article) : string;
         public function get($uuid) : Comment;
     }

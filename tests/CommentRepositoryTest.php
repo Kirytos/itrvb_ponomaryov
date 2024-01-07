@@ -12,32 +12,29 @@ require_once 'src/Autoloader.php';
 class CommentRepositoryTest extends TestCase
 {
 
+    private string $authorId = "1";
+    private string $text = "testText";
+    private string $id = "10";
+    private string $articleId = "11";
+
     /**
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws IllegalArgumentException
      */
-    public function testShouldSaveCommentToDatabase(): void
+    public function testShouldThrowsAnExceptionWhenCommentNotFound(): void
     {
-        $statementMock = $this->createMock(PDOStatement::class);
         $connectionStub = $this->createStub(PDO::class);
-        $waitingComment = new Comment(
-            authorId: 10,
-            articleId: 100,
-            text: "testText",
-            id: 1
-        );
+        $statementStub = $this->createStub(PDOStatement::class);
 
-        $statementMock->expects($this->once())->method('execute')->with([
-            ':uuid' => $waitingComment->getUuid(),
-            ':author_uuid' => $waitingComment->getAuthorUuid(),
-            ':article_uuid' => $waitingComment->getArticleUuid(),
-            ':text' => $waitingComment->getText(),
-        ]);
-
-        $connectionStub->method('prepare')->willReturn($statementMock);
+        $statementStub->method('fetch')->willReturn(false);
+        $connectionStub->method('prepare')->willReturn($statementStub);
 
         $repository = new CommentRepositoryImpl($connectionStub);
-        $repository->save($waitingComment);
+
+        $this->expectException(CommentNotFoundException::class);
+        $this->expectExceptionMessage("Comment with UUID $this->id not found!");
+
+        $repository->get($this->id);
     }
 
     /**
@@ -50,10 +47,10 @@ class CommentRepositoryTest extends TestCase
         $connectionStub = $this->createStub(PDO::class);
         $statementMock = $this->createMock(PDOStatement::class);
         $waitingComment = new Comment(
-            authorId: 10,
-            articleId: 100,
-            text: "testText",
-            id: 1
+            authorId: $this->authorId,
+            articleId: $this->articleId,
+            text: $this->text,
+            id: $this->id
         );
 
         $statementMock->method('fetch')->willReturn([
@@ -80,21 +77,27 @@ class CommentRepositoryTest extends TestCase
      * @throws \PHPUnit\Framework\MockObject\Exception
      * @throws IllegalArgumentException
      */
-    public function testShouldThrowsAnExceptionWhenCommentNotFound(): void
+    public function testShouldSaveCommentToDatabase(): void
     {
+        $statementMock = $this->createMock(PDOStatement::class);
         $connectionStub = $this->createStub(PDO::class);
-        $statementStub = $this->createStub(PDOStatement::class);
+        $waitingComment = new Comment(
+            authorId: $this->authorId,
+            articleId: $this->articleId,
+            text: $this->text,
+            id: $this->id
+        );
 
-        $statementStub->method('fetch')->willReturn(false);
-        $connectionStub->method('prepare')->willReturn($statementStub);
+        $statementMock->expects($this->once())->method('execute')->with([
+            ':uuid' => $waitingComment->getUuid(),
+            ':author_uuid' => $waitingComment->getAuthorUuid(),
+            ':article_uuid' => $waitingComment->getArticleUuid(),
+            ':text' => $waitingComment->getText(),
+        ]);
+
+        $connectionStub->method('prepare')->willReturn($statementMock);
 
         $repository = new CommentRepositoryImpl($connectionStub);
-
-        $assumedUuid = 1;
-
-        $this->expectException(CommentNotFoundException::class);
-        $this->expectExceptionMessage("Comment with UUID $assumedUuid not found!");
-
-        $repository->get($assumedUuid);
+        $repository->save($waitingComment);
     }
 }

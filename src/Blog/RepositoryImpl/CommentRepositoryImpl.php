@@ -27,11 +27,12 @@ class CommentRepositoryImpl implements CommentRepository
     /**
      * @throws IllegalArgumentException
      */
-    public function save($comment): void
+    public function save($comment): string
     {
         $statement = $this->pdo->prepare(
             "INSERT INTO comments (uuid, author_uuid, article_uuid, text) VALUES (:uuid, :author_uuid, :article_uuid, :text)"
         );
+
         if ($comment->getUuid() === null || $comment->getUuid() === '') {
             $comment = new Comment(
                 authorId: $comment->getAuthorUuid(),
@@ -40,9 +41,10 @@ class CommentRepositoryImpl implements CommentRepository
                 id: $this->faker->unique()->uuid
             );
         }
+
         try {
             $statement->execute([
-                ':uuid' => (string)$comment->getUuid(),
+                ':uuid' => $comment->getUuid(),
                 ':author_uuid' => $comment->getAuthorUuid(),
                 ':article_uuid' => $comment->getArticleUuid(),
                 ':text' => $comment->getText()
@@ -50,6 +52,8 @@ class CommentRepositoryImpl implements CommentRepository
         } catch (PDOException $exception) {
             throw new IllegalArgumentException("Save comment error with message: " . $exception->getMessage());
         }
+
+        return $comment->getUuid();
     }
 
     /**
@@ -58,15 +62,15 @@ class CommentRepositoryImpl implements CommentRepository
      */
     public function get($uuid): Comment
     {
-        $stmt = $this->pdo->prepare(
+        $statement = $this->pdo->prepare(
             "SELECT * FROM comments WHERE uuid = :uuid"
         );
 
         try {
-            $stmt->execute([
+            $statement->execute([
                 ":uuid" => $uuid
             ]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
             if (!$result) {
                 throw new CommentNotFoundException("Comment with UUID $uuid not found!");
             }
