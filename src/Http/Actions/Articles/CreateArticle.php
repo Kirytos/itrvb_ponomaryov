@@ -2,7 +2,7 @@
 
 namespace Http\Actions\Articles;
 
-use Blog\Exception\HttpException;
+use Blog\Exception\RouteException;
 use Http\Actions\ActionInterface;
 use Http\ErrorResponse;
 use Http\SuccessfulResponse;
@@ -10,7 +10,6 @@ use Blog\Models\Article;
 use Blog\Repository\ArticlesRepository;
 use Http\Response;
 use Exception;
-use Faker\Factory;
 
 require 'vendor/autoload.php';
 require_once 'src/Autoloader.php';
@@ -27,7 +26,7 @@ class CreateArticle implements ActionInterface
                 $request->jsonBodyField('title'),
                 $request->jsonBodyField('text')
             );
-        } catch (HttpException) {
+        } catch (RouteException) {
             return new ErrorResponse('error with getting JSON');
         }
 

@@ -9,22 +9,28 @@ use Http\Actions\Comments\CreateComment;
 use Http\Actions\Likes\CreateLike;
 use Http\ErrorResponse;
 use Http\Request;
-use Blog\Exception\HttpException;
+use Blog\Exception\RouteException;
+use Psr\Log\LoggerInterface;
 
 $container = require __DIR__ . '/bootstrap.php';
 
 $request = new Request($_GET, $_SERVER, file_get_contents('php://input'));
 
+$logger = $container->get(LoggerInterface::class);
 
 try {
     $path = $request->path();
-} catch (HttpException) {
+} catch (RouteException $e) {
+    $logger->warning($e->getMessage());
+    (new ErrorResponse)->send();
     return;
 }
 
 try {
     $method = $request->method();
-} catch (HttpException) {
+} catch (RouteException $e) {
+    $logger->warning($e->getMessage());
+    (new ErrorResponse)->send();
     return;
 }
 
@@ -40,11 +46,13 @@ $routes = [
 ];
 
 if (!array_key_exists($method, $routes)) {
+    $logger->notice("Error route: $method $path");
     (new ErrorResponse('Not found'))->send();
     return;
 }
 
 if (!array_key_exists($path, $routes[$method])) {
+    $logger->notice("Error route: $method $path");
     (new ErrorResponse('Not found'))->send();
     return;
 }
@@ -56,5 +64,6 @@ try {
 
     $response->send();
 } catch (Exception $error) {
+    $logger->error($error->getMessage(), ['exception' => $error]);
     (new ErrorResponse($error->getMessage()))->send();
 }

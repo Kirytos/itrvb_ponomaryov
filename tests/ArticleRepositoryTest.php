@@ -1,24 +1,30 @@
 <?php
 
+namespace tests;
+
 use Blog\Exception\ArticleNotFoundException;
 use Blog\Exception\IllegalArgumentException;
 use Blog\Models\Article;
 use Blog\RepositoryImpl\ArticlesRepositoryImpl;
+use PDO;
+use PDOStatement;
+use Mock\TestRealizationLogger;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 
 require 'vendor/autoload.php';
 require_once 'src/Autoloader.php';
+require 'Mock/TestRealizationLogger.php';
 
 class ArticleRepositoryTest extends TestCase
 {
-
     private string $authorId = "1";
     private string $title = "testTitle";
     private string $text = "testText";
     private string $id = "10";
 
     /**
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      * @throws IllegalArgumentException
      */
     public function testShouldDeleteArticleFromDatabase(): void
@@ -29,7 +35,7 @@ class ArticleRepositoryTest extends TestCase
         $connectionStub = $this->createStub(PDO::class);
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new ArticlesRepositoryImpl($connectionStub);
+        $repository = new ArticlesRepositoryImpl($connectionStub, new TestRealizationLogger());
 
         $this->expectException(ArticleNotFoundException::class);
         $this->expectExceptionMessage("Article with UUID $this->id not found.");
@@ -38,7 +44,7 @@ class ArticleRepositoryTest extends TestCase
     }
 
     /**
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      * @throws IllegalArgumentException
      * @throws ArticleNotFoundException
      */
@@ -62,7 +68,7 @@ class ArticleRepositoryTest extends TestCase
 
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new ArticlesRepositoryImpl($connectionStub);
+        $repository = new ArticlesRepositoryImpl($connectionStub, new TestRealizationLogger());
 
         $uuidByWaitingArticle = $waitingArticle->getUuid();
         $actualArticle = $repository->get($uuidByWaitingArticle);
@@ -74,27 +80,7 @@ class ArticleRepositoryTest extends TestCase
     }
 
     /**
-     * @throws \PHPUnit\Framework\MockObject\Exception
-     * @throws IllegalArgumentException
-     */
-    public function testShouldThrowsAnExceptionWhenArticleNotFound(): void
-    {
-        $connectionStub = $this->createStub(PDO::class);
-        $statementStub = $this->createStub(PDOStatement::class);
-
-        $statementStub->method('fetch')->willReturn(false);
-        $connectionStub->method('prepare')->willReturn($statementStub);
-
-        $repository = new ArticlesRepositoryImpl($connectionStub);
-
-        $this->expectException(ArticleNotFoundException::class);
-        $this->expectExceptionMessage("Article with UUID: $this->id not found!");
-
-        $repository->get($this->id);
-    }
-
-    /**
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
      * @throws IllegalArgumentException
      */
     public function testShouldSaveArticleToDatabase(): void
@@ -117,9 +103,27 @@ class ArticleRepositoryTest extends TestCase
 
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new ArticlesRepositoryImpl($connectionStub);
+        $repository = new ArticlesRepositoryImpl($connectionStub, new TestRealizationLogger());
         $repository->save($waitingArticle);
     }
 
+    /**
+     * @throws Exception
+     * @throws IllegalArgumentException
+     */
+    public function testShouldThrowsAnExceptionWhenArticleNotFound(): void
+    {
+        $connectionStub = $this->createStub(PDO::class);
+        $statementStub = $this->createStub(PDOStatement::class);
 
+        $statementStub->method('fetch')->willReturn(false);
+        $connectionStub->method('prepare')->willReturn($statementStub);
+
+        $repository = new ArticlesRepositoryImpl($connectionStub, new TestRealizationLogger());
+
+        $this->expectException(ArticleNotFoundException::class);
+        $this->expectExceptionMessage("Article with UUID: $this->id not found!");
+
+        $repository->get($this->id);
+    }
 }

@@ -6,7 +6,7 @@ use Blog\Repository\ArticlesRepository;
 use Http\Actions\ActionInterface;
 use Http\ErrorResponse;
 use Http\SuccessfulResponse;
-use Blog\Exception\HttpException;
+use Blog\Exception\RouteException;
 use Http\Response;
 
 class DeleteArticle implements ActionInterface
@@ -19,7 +19,7 @@ class DeleteArticle implements ActionInterface
             $articleId = $request->query(
                 'uuid'
             );
-        } catch (HttpException $e) {
+        } catch (RouteException $e) {
             return new ErrorResponse($e->getMessage());
         }
 

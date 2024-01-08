@@ -2,10 +2,9 @@
 
 namespace Http\Actions\Likes;
 
-use Blog\Exception\HttpException;
+use Blog\Exception\RouteException;
 use Blog\Models\Like;
 use Blog\Repository\LikesRepository;
-use Faker\Factory;
 use Http\Actions\ActionInterface;
 use Http\ErrorResponse;
 use Http\Response;
@@ -31,7 +30,7 @@ class CreateLike implements ActionInterface
                 authorId: $request->jsonBodyField('author_uuid'),
                 articleId: $request->jsonBodyField('article_uuid')
             );
-        } catch (HttpException $exception) {
+        } catch (RouteException $exception) {
             return new ErrorResponse($exception->getMessage());
         }
 

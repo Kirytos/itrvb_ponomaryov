@@ -13,13 +13,14 @@ use Faker\Factory;
 use Faker\Generator;
 use PDO;
 use PDOException;
+use Psr\Log\LoggerInterface;
 
 class ArticlesRepositoryImpl implements ArticlesRepository
 {
 
     private Generator $faker;
 
-    public function __construct(private readonly PDO $pdo)
+    public function __construct(private readonly PDO $pdo, private readonly LoggerInterface $loggerInterface)
     {
         $this->faker = Factory::create();
     }
@@ -40,7 +41,9 @@ class ArticlesRepositoryImpl implements ArticlesRepository
             ]);
             $result = $statement->fetch(PDO::FETCH_ASSOC);
             if (!$result) {
-                throw new ArticleNotFoundException("Article with UUID: $uuid not found!");
+                $message = "Article with UUID: $uuid not found!";
+                $this->loggerInterface->warning("During save" . $message);
+                throw new ArticleNotFoundException($message);
             }
         } catch (PDOException $e) {
             throw new IllegalArgumentException("Error with getting article: " . $e->getMessage());
@@ -54,9 +57,6 @@ class ArticlesRepositoryImpl implements ArticlesRepository
      */
     public function save($article): string
     {
-        $statement = $this->pdo->prepare(
-            'INSERT INTO articles (uuid, author_uuid, title, text) VALUES (:uuid, :author_uuid, :title, :text)'
-        );
         if ($article->getUuid() === null || $article->getUuid() === '') {
             $article = new Article(
                 authorId: $article->getAuthorUuid(),
@@ -65,6 +65,13 @@ class ArticlesRepositoryImpl implements ArticlesRepository
                 id: $this->faker->unique()->uuid
             );
         }
+
+        $this->loggerInterface->info("start save article with UUID: ". $article->getUuid());
+
+        $statement = $this->pdo->prepare(
+            'INSERT INTO articles (uuid, author_uuid, title, text) VALUES (:uuid, :author_uuid, :title, :text)'
+        );
+
         try {
             $statement->execute([
                 ':uuid' => (string)$article->getUuid(),
@@ -72,8 +79,10 @@ class ArticlesRepositoryImpl implements ArticlesRepository
                 ':title' => $article->getTitle(),
                 ':text' => $article->getText(),
             ]);
-        } catch (PDOException $exception) {
-            throw new IllegalArgumentException("Save articles error with message: " . $exception->getMessage());
+        } catch (PDOException $e) {
+            $errorMessage = $e->getMessage();
+            $this->loggerInterface->warning("Save article error with UUID: " . $article->getUuid() . " with error: " . $errorMessage);
+            throw new IllegalArgumentException("Save article error with message: " . $e->getMessage());
         }
 
         return $article->getUuid();
@@ -90,7 +99,9 @@ class ArticlesRepositoryImpl implements ArticlesRepository
         try {
             $statement->execute([':uuid' => $uuid]);
             if ($statement->rowCount() === 0) {
-                throw new ArticleNotFoundException("Article with UUID {$uuid} not found.");
+                $message = "Article with UUID {$uuid} not found.";
+                $this->loggerInterface->warning($message);
+                throw new ArticleNotFoundException($message);
             }
         } catch (PDOException $exception) {
             throw new IllegalArgumentException("Delete article error with message: " . $exception->getMessage());

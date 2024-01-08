@@ -13,13 +13,14 @@ use Faker\Factory;
 use Faker\Generator;
 use PDO;
 use PDOException;
+use Psr\Log\LoggerInterface;
 
 class CommentRepositoryImpl implements CommentRepository
 {
 
     private Generator $faker;
 
-    public function __construct(private PDO $pdo)
+    public function __construct(private readonly PDO $pdo, private LoggerInterface $loggerInterface)
     {
         $this->faker = Factory::create();
     }
@@ -29,10 +30,6 @@ class CommentRepositoryImpl implements CommentRepository
      */
     public function save($comment): string
     {
-        $statement = $this->pdo->prepare(
-            "INSERT INTO comments (uuid, author_uuid, article_uuid, text) VALUES (:uuid, :author_uuid, :article_uuid, :text)"
-        );
-
         if ($comment->getUuid() === null || $comment->getUuid() === '') {
             $comment = new Comment(
                 authorId: $comment->getAuthorUuid(),
@@ -42,6 +39,12 @@ class CommentRepositoryImpl implements CommentRepository
             );
         }
 
+        $this->loggerInterface->info("start save comment with UUID: " . $comment->getUuid());
+
+        $statement = $this->pdo->prepare(
+            "INSERT INTO comments (uuid, author_uuid, article_uuid, text) VALUES (:uuid, :author_uuid, :article_uuid, :text)"
+        );
+
         try {
             $statement->execute([
                 ':uuid' => $comment->getUuid(),
@@ -50,7 +53,9 @@ class CommentRepositoryImpl implements CommentRepository
                 ':text' => $comment->getText()
             ]);
         } catch (PDOException $exception) {
-            throw new IllegalArgumentException("Save comment error with message: " . $exception->getMessage());
+            $message = "Save comment error with message: " . $exception->getMessage();
+            $this->loggerInterface->warning($message);
+            throw new IllegalArgumentException($message);
         }
 
         return $comment->getUuid();
@@ -72,7 +77,9 @@ class CommentRepositoryImpl implements CommentRepository
             ]);
             $result = $statement->fetch(PDO::FETCH_ASSOC);
             if (!$result) {
-                throw new CommentNotFoundException("Comment with UUID $uuid not found!");
+                $message = "Comment with UUID $uuid not found!";
+                $this->loggerInterface->warning($message);
+                throw new CommentNotFoundException($message);
             }
         } catch (PDOException $e) {
             throw new IllegalArgumentException("Error with getting comment: " . $e->getMessage());

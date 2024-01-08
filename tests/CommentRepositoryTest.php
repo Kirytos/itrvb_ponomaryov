@@ -4,6 +4,7 @@ use Blog\Exception\CommentNotFoundException;
 use Blog\Exception\IllegalArgumentException;
 use Blog\Models\Comment;
 use Blog\RepositoryImpl\CommentRepositoryImpl;
+use Mock\TestRealizationLogger;
 use PHPUnit\Framework\TestCase;
 
 require 'vendor/autoload.php';
@@ -29,7 +30,7 @@ class CommentRepositoryTest extends TestCase
         $statementStub->method('fetch')->willReturn(false);
         $connectionStub->method('prepare')->willReturn($statementStub);
 
-        $repository = new CommentRepositoryImpl($connectionStub);
+        $repository = new CommentRepositoryImpl($connectionStub, new TestRealizationLogger());
 
         $this->expectException(CommentNotFoundException::class);
         $this->expectExceptionMessage("Comment with UUID $this->id not found!");
@@ -62,7 +63,7 @@ class CommentRepositoryTest extends TestCase
 
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new CommentRepositoryImpl($connectionStub);
+        $repository = new CommentRepositoryImpl($connectionStub, new TestRealizationLogger());
 
         $uuidByWaitingComment = $waitingComment->getUuid();
         $actualComment = $repository->get($uuidByWaitingComment);
@@ -97,7 +98,7 @@ class CommentRepositoryTest extends TestCase
 
         $connectionStub->method('prepare')->willReturn($statementMock);
 
-        $repository = new CommentRepositoryImpl($connectionStub);
+        $repository = new CommentRepositoryImpl($connectionStub, new TestRealizationLogger());
         $repository->save($waitingComment);
     }
 }

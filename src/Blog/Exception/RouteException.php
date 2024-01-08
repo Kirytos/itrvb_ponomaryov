@@ -4,6 +4,6 @@ namespace Blog\Exception;
 
 use Exception;
 
-class HttpException extends Exception {
+class RouteException extends Exception {
 
 }

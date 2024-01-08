@@ -2,8 +2,7 @@
 
 namespace Http\Actions\Comments;
 
-use Blog\Exception\HttpException;
-use Faker\Factory;
+use Blog\Exception\RouteException;
 use Http\Actions\ActionInterface;
 use Http\ErrorResponse;
 use Http\Response;
@@ -28,7 +27,7 @@ class CreateComment implements ActionInterface
                 articleId: $request->jsonBodyField('article_uuid'),
                 text: $request->jsonBodyField('text')
             );
-        } catch (HttpException $e) {
+        } catch (RouteException $e) {
             return new ErrorResponse($e->getMessage());
         }
 

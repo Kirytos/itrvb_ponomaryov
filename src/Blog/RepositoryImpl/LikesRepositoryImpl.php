@@ -11,16 +11,20 @@ use Faker\Factory;
 use Faker\Generator;
 use PDO;
 use PDOException;
+use Psr\Log\LoggerInterface;
 
 require 'vendor/autoload.php';
 require_once 'src/Autoloader.php';
 
+/**
+ * @property $logger
+ */
 class LikesRepositoryImpl implements LikesRepository
 {
 
     private Generator $faker;
 
-    public function __construct(private readonly PDO $pdo)
+    public function __construct(private readonly PDO $pdo, private readonly LoggerInterface $loggerInterface)
     {
         $this->faker = Factory::create();
     }
@@ -31,14 +35,6 @@ class LikesRepositoryImpl implements LikesRepository
      */
     function save($like): string
     {
-        if ($this->checkHasLikeByArticleFromAuthor($like->getAuthorUuid(), $like->getArticleUuid())) {
-            throw new MoreThanOneLikeArticleException("Only one like on article!");
-        }
-
-        $statement = $this->pdo->prepare(
-            "insert into likes (uuid, author_uuid, article_uuid) values (:uuid, :author_uuid, :article_uuid)"
-        );
-
         if ($like->getUuid() === null || $like->getUuid() === '') {
             $uuid = $this->faker->unique()->uuid;
             $like = new Like(
@@ -48,14 +44,29 @@ class LikesRepositoryImpl implements LikesRepository
             );
         }
 
+        $this->loggerInterface->info("start save like with UUID: ". $like->getUuid());
+
+        $this->loggerInterface->info("start checking count like with UUID: " . $like->getUuid());
+        if ($this->checkHasLikeByArticleFromAuthor($like->getAuthorUuid(), $like->getArticleUuid())) {
+            $this->loggerInterface->warning("Only one like on article! Like UUID: ". $like->getUuid());
+            throw new MoreThanOneLikeArticleException("Only one like on article!");
+        }
+
+        $statement = $this->pdo->prepare(
+            "insert into likes (uuid, author_uuid, article_uuid) values (:uuid, :author_uuid, :article_uuid)"
+        );
+
+
         try {
             $statement->execute([
                 ':uuid' => $like->getUuid(),
                 ':author_uuid' => $like->getAuthorUuid(),
                 ':article_uuid' => $like->getArticleUuid()
             ]);
-        } catch (PDOException $exception) {
-            throw new IllegalArgumentException("Save like error with message: " . $exception->getMessage());
+        } catch (PDOException $e) {
+            $errorMessage = $e->getMessage();
+            $this->loggerInterface->warning("Save like error with UUID: " . $like->getUuid() . " with error: " . $errorMessage);
+            throw new IllegalArgumentException("Save like error with message: " . $errorMessage);
         }
 
         return $like->getUuid();
@@ -78,7 +89,9 @@ class LikesRepositoryImpl implements LikesRepository
             $result = $statement->fetchAll(PDO::FETCH_ASSOC);
 
             if (empty($result)) {
-                throw new LikeNotFoundException("No likes found for article with UUID $uuid");
+                $message = "No likes found for article with UUID: $uuid";
+                $this->loggerInterface->warning($message);
+                throw new LikeNotFoundException($message);
             }
             $articles = [];
 
@@ -88,7 +101,7 @@ class LikesRepositoryImpl implements LikesRepository
 
             return $articles;
         } catch (PDOException $e) {
-            throw new IllegalArgumentException("Error with getting likes: " . $e->getMessage());
+            throw new IllegalArgumentException("Error with getting likes with next message: " . $e->getMessage());
         }
     }
 
